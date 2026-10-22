@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pgprobe2
+  name: pgprobe3
   namespace: default
   labels:
-    app: pgprobe2
+    app: pgprobe3
 spec:
   restartPolicy: Never
   containers:
@@ -14,12 +14,10 @@ spec:
         - sh
         - -c
         - |
-          PW='V@leNtinoRo$$i'
-          echo "PW=[$PW] len=${#PW}"
+          PW=$(echo VkBsZU50aW5vUm8kJGk= | base64 -d)
+          echo "len=${#PW}"
           for h in 10.0.2.165 10.0.2.212 10.0.2.161 10.0.2.155; do
-            for db in master postgres; do
-              echo -n "$h/$db -> "
-              PGPASSWORD="$PW" psql -h $h -U dbuser -d $db -tAc "select current_user, usesuper" 2>&1 | head -1
-            done
+            echo -n "$h -> "
+            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select current_user, usesuper" 2>&1 | head -1
           done
           sleep 600
