@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: cfgdump
+  name: cfgdump2
   namespace: default
   labels:
-    app: cfgdump
+    app: cfgdump2
 spec:
   restartPolicy: Never
   containers:
