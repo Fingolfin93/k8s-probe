@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pgprobe4
+  name: pgprobe5
   namespace: default
   labels:
-    app: pgprobe4
+    app: pgprobe5
 spec:
   restartPolicy: Never
   containers:
@@ -15,10 +15,14 @@ spec:
         - -c
         - |
           PW=$(echo VkBsZU50aW5vUm8kJGk= | base64 -d)
-          for h in 10.0.2.165 10.0.2.212; do
-            echo "=== $h ==="
-            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select version()" 2>&1 | head -2
-            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select rolname, rolsuper, rolcreatedb from pg_roles where rolname=current_user" 2>&1 | head -2
-            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select datname from pg_database order by 1" 2>&1 | head -12
-          done
+          echo -n "cmp 库总数: "
+          PGPASSWORD="$PW" psql -h 10.0.2.212 -U dbuser -d postgres -tAc "select count(*) from pg_database where datname not in ('template0','template1')"
+          echo -n "rdb 库总数: "
+          PGPASSWORD="$PW" psql -h 10.0.2.161 -U dbuser -d postgres -tAc "select count(*) from pg_database where datname not in ('template0','template1')"
+          echo "=== master 表 ==="
+          PGPASSWORD="$PW" psql -h 10.0.2.165 -U dbuser -d master -tAc "select table_name from information_schema.tables where table_schema='public' order by 1" 2>&1 | head -15
+          echo "=== aamc_iau 表数 ==="
+          PGPASSWORD="$PW" psql -h 10.0.2.212 -U dbuser -d aamc_iau -tAc "select count(*) from information_schema.tables where table_schema='public'" 2>&1 | head -2
+          echo "=== aamc_iau 表名样本 ==="
+          PGPASSWORD="$PW" psql -h 10.0.2.212 -U dbuser -d aamc_iau -tAc "select table_name from information_schema.tables where table_schema='public' order by 1" 2>&1 | head -12
           sleep 600
