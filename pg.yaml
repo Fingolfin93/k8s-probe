@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pgprobe3
+  name: pgprobe4
   namespace: default
   labels:
-    app: pgprobe3
+    app: pgprobe4
 spec:
   restartPolicy: Never
   containers:
@@ -15,9 +15,10 @@ spec:
         - -c
         - |
           PW=$(echo VkBsZU50aW5vUm8kJGk= | base64 -d)
-          echo "len=${#PW}"
-          for h in 10.0.2.165 10.0.2.212 10.0.2.161 10.0.2.155; do
-            echo -n "$h -> "
-            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select current_user, usesuper" 2>&1 | head -1
+          for h in 10.0.2.165 10.0.2.212; do
+            echo "=== $h ==="
+            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select version()" 2>&1 | head -2
+            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select rolname, rolsuper, rolcreatedb from pg_roles where rolname=current_user" 2>&1 | head -2
+            PGPASSWORD="$PW" psql -h $h -U dbuser -d postgres -tAc "select datname from pg_database order by 1" 2>&1 | head -12
           done
           sleep 600
