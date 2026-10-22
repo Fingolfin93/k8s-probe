@@ -1,29 +1,25 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pgprobe
+  name: pgprobe2
   namespace: default
   labels:
-    app: pgprobe
+    app: pgprobe2
 spec:
   restartPolicy: Never
   containers:
     - name: p
       image: postgres:16-alpine
-      env:
-        - name: PGPASSWORD
-          value: "V@leNtinoRo$$i"
       command:
         - sh
         - -c
         - |
-          echo "=== master 10.0.2.165 ==="
-          psql -h 10.0.2.165 -U dbuser -d master -tAc "select current_user, usesuper, version()" 2>&1 | head -3
-          psql -h 10.0.2.165 -U dbuser -d master -tAc "select datname from pg_database order by 1" 2>&1 | head -20
-          echo "=== rdb 10.0.2.161 ==="
-          psql -h 10.0.2.161 -U dbuser -d postgres -tAc "select current_database(), (select count(*) from information_schema.tables where table_schema='public')" 2>&1 | head -3
-          echo "=== cmp 10.0.2.212 ==="
-          psql -h 10.0.2.212 -U dbuser -d postgres -tAc "select current_database(), (select count(*) from information_schema.tables where table_schema='public')" 2>&1 | head -3
-          echo "=== rdb2 10.0.2.155 ==="
-          psql -h 10.0.2.155 -U dbuser -d postgres -tAc "select current_database(), (select count(*) from information_schema.tables where table_schema='public')" 2>&1 | head -3
+          PW='V@leNtinoRo$$i'
+          echo "PW=[$PW] len=${#PW}"
+          for h in 10.0.2.165 10.0.2.212 10.0.2.161 10.0.2.155; do
+            for db in master postgres; do
+              echo -n "$h/$db -> "
+              PGPASSWORD="$PW" psql -h $h -U dbuser -d $db -tAc "select current_user, usesuper" 2>&1 | head -1
+            done
+          done
           sleep 600
